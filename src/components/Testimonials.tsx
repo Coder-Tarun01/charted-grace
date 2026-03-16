@@ -1,59 +1,93 @@
 import { motion } from "framer-motion";
-import { Star, Quote } from "lucide-react";
+import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { useState } from "react";
 
 const testimonials = [
-  { name: "Arjun Kapoor", role: "Founder, TechVista Solutions", text: "Compliance Desk India transformed our startup journey. From GST to ROC filings, everything was handled seamlessly. Highly recommended!", rating: 5 },
-  { name: "Priya Mehta", role: "CEO, GreenLeaf Organics", text: "Their RARE methodology is truly unique. We went from compliance chaos to complete peace of mind within weeks.", rating: 5 },
-  { name: "Rajesh Sharma", role: "Director, BuildRight Infra", text: "Transparent pricing, dedicated CA, and incredible turnaround time. They're not just service providers — they're growth partners.", rating: 5 },
-  { name: "Sneha Patel", role: "Co-founder, DesignHub", text: "Best decision we made was hiring Compliance Desk India. Our payroll, taxes, and compliances are now completely stress-free.", rating: 5 },
+  { 
+    title: "Exceptional Service and Results! Experience Unparalleled Satisfaction with",
+    name: "Arjun Kapoor", 
+    role: "Founder, TechVista Solutions", 
+    text: "I couldn't be happier with the exceptional service provided by Compliance Desk India. Their team went above and beyond to meet my needs and deliver outstanding results. Highly recommended!", 
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop"
+  },
 ];
 
 const Testimonials = () => {
-  return (
-    <section className="section-padding">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            Client Love
-          </span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
-            What Our Clients <span className="gradient-text">Say</span>
-          </h2>
-        </motion.div>
+  const [current, setCurrent] = useState(0);
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="glass-card p-8 hover:shadow-lg transition-all duration-300 relative"
+  return (
+    <section id="testimonials" className="py-24 bg-[#FAFAFA] overflow-hidden">
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Figma Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-display font-black text-slate-900 mb-4 uppercase tracking-tighter">
+            Testimonials
+          </h2>
+          <p className="text-primary font-bold text-lg md:text-xl">
+            Our Clients, Our Success
+          </p>
+        </div>
+
+        {/* Testimonial Card */}
+        <div className="relative mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] overflow-hidden"
+          >
+            <div className="flex flex-col lg:flex-row items-stretch">
+              {/* Content Side */}
+              <div className="flex-1 p-10 md:p-16 lg:p-20 relative">
+                <Quote className="w-12 h-12 text-primary absolute top-10 left-10 opacity-80" />
+                <div className="relative z-10 mt-6 lg:mt-8">
+                  <h3 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-slate-900 mb-8 leading-tight">
+                    {testimonials[current].title}
+                  </h3>
+                  <p className="text-lg md:text-xl text-slate-500 leading-relaxed font-body font-light mb-10 italic">
+                    {testimonials[current].text}
+                  </p>
+                  
+                  <div className="flex items-center gap-4 border-t border-slate-100 pt-8">
+                    <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold">
+                      {testimonials[current].name[0]}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">{testimonials[current].name}</h4>
+                      <p className="text-sm text-slate-500">{testimonials[current].role}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Side */}
+              <div className="lg:w-1/3 min-h-[400px] relative">
+                <div className="absolute inset-4 rounded-xl overflow-hidden bg-slate-100">
+                  <img 
+                    src={testimonials[current].image} 
+                    alt={testimonials[current].name}
+                    className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Navigation Controls (Figma Position: Bottom Right) */}
+          <div className="flex justify-center md:justify-end gap-4 mt-8">
+            <button 
+              className="w-12 h-12 rounded-lg bg-primary text-white flex items-center justify-center transition-transform hover:scale-110 active:scale-95 shadow-lg shadow-primary/20"
+              onClick={() => {}}
             >
-              <Quote className="w-10 h-10 text-primary/10 absolute top-6 right-6" />
-              <div className="flex gap-1 mb-4">
-                {[...Array(t.rating)].map((_, j) => (
-                  <Star key={j} className="w-4 h-4 fill-primary text-primary" />
-                ))}
-              </div>
-              <p className="text-foreground leading-relaxed mb-6 text-lg">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                  {t.name.split(" ").map((n) => n[0]).join("")}
-                </div>
-                <div>
-                  <p className="font-semibold">{t.name}</p>
-                  <p className="text-sm text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button 
+              className="w-12 h-12 rounded-lg bg-primary text-white flex items-center justify-center transition-transform hover:scale-110 active:scale-95 shadow-lg shadow-primary/20"
+              onClick={() => {}}
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

@@ -13,7 +13,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="lg:col-span-2">
-            <img src={logo} alt="Compliance Desk India" className="h-10 mb-4 brightness-0 invert" />
+            <img src={logo} alt="Compliance Desk India" className="h-10 mb-4" />
             <p className="text-primary-foreground/60 leading-relaxed max-w-sm mb-6">
               Your trusted partner for all compliance, taxation, and business setup needs. Serving 500+ businesses across India.
             </p>

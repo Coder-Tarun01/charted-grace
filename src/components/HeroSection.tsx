@@ -1,243 +1,105 @@
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { ArrowRight, Shield, CheckCircle2, TrendingUp, Search, FileText, Building2, Receipt, Users, Scale, ClipboardCheck } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-
-const services = [
-  { icon: Building2, label: "Business Registration" },
-  { icon: Receipt, label: "GST Filing" },
-  { icon: FileText, label: "Income Tax Returns" },
-  { icon: Users, label: "Payroll Management" },
-  { icon: Scale, label: "Legal Documentation" },
-  { icon: ClipboardCheck, label: "Compliance Audit" },
-];
-
-const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, (v) => Math.round(v));
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    const controls = animate(count, target, { duration: 2, ease: "easeOut" });
-    const unsubscribe = rounded.on("change", (v) => setDisplay(v));
-    return () => { controls.stop(); unsubscribe(); };
-  }, [target]);
-
-  return <span>{display}{suffix}</span>;
-};
+import { motion } from "framer-motion";
+import { Search, Shield, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 const HeroSection = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
-  const filteredServices = services.filter((s) =>
-    s.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
-    <section className="relative overflow-hidden min-h-screen flex items-center">
-      {/* Layered background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-accent via-background to-secondary" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
-        backgroundSize: '40px 40px'
-      }} />
-      
-      {/* Animated orbs */}
-      <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.06, 0.12, 0.06] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-10 right-[10%] w-[500px] h-[500px] bg-primary rounded-full blur-[120px]"
-      />
-      <motion.div
-        animate={{ scale: [1.2, 1, 1.2], opacity: [0.04, 0.08, 0.04] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-0 left-[5%] w-[400px] h-[400px] bg-primary rounded-full blur-[100px]"
-      />
-      <motion.div
-        animate={{ y: [0, -20, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[20%] left-[60%] w-3 h-3 rounded-full bg-primary/30"
-      />
-      <motion.div
-        animate={{ y: [0, 15, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute top-[60%] left-[20%] w-2 h-2 rounded-full bg-primary/20"
-      />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      {/* Institutional Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" 
+          alt="Institutional Architecture" 
+          className="w-full h-full object-cover grayscale-[0.2] contrast-[1.1]"
+        />
+        {/* Deep Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-slate-900/60 to-slate-900/90" />
+      </div>
 
-      <div className="container mx-auto px-4 relative z-10 py-12">
-        <div className="max-w-6xl mx-auto">
-          {/* Top badge row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-wrap items-center justify-center gap-3 mb-8"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold backdrop-blur-sm border border-primary/10">
-              <Shield className="w-4 h-4" />
-              India's Trusted Compliance Partner
-            </div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/5 text-foreground/70 text-sm font-medium backdrop-blur-sm border border-foreground/5">
-              <CheckCircle2 className="w-4 h-4 text-primary" />
-              Rated 4.9/5 by 500+ Businesses
-            </div>
-          </motion.div>
-
-          {/* Main headline - centered */}
+      <div className="container mx-auto px-4 relative z-10 py-20 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-5xl mx-auto"
+        >
+          {/* Header Area */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-center mb-8"
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-display font-bold leading-[1.1] mb-6">
-              <span className="text-foreground">Compliance at</span>
-              <br />
-              <span className="gradient-text">Convenience</span>
+            <div className="inline-flex items-center gap-2 mb-10 px-4 py-1.5 bg-primary rounded-full shadow-2xl shadow-primary/20">
+              <Shield className="w-4 h-4 text-white" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Certified Institutional Protocol</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-display font-bold text-white leading-[0.85] tracking-tighter mb-10 drop-shadow-2xl">
+              Governance. <br />
+              <span className="text-primary italic font-serif">Integrity.</span> <br />
+              Scale.
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-body leading-relaxed">
-              From registrations to returns, we handle every compliance need so you can focus on what matters — <span className="text-foreground font-semibold">growing your business.</span>
+            
+            <p className="text-xl md:text-2xl text-slate-200 max-w-xl mx-auto leading-relaxed font-body font-light mb-16 opacity-80 uppercase tracking-widest">
+              The definitive operating system for high-stakes corporate compliance.
             </p>
           </motion.div>
 
-          {/* Search bar */}
+          {/* Massively Highlighted Search Portal */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="max-w-2xl mx-auto mb-12 relative"
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="relative max-w-4xl mx-auto group"
           >
-            <div className={`relative rounded-2xl transition-all duration-300 ${
-              isFocused 
-                ? 'shadow-[0_8px_40px_-8px_hsl(var(--primary)/0.25)] ring-2 ring-primary/20' 
-                : 'shadow-[var(--shadow-elevated)]'
-            }`}>
-              <div className="flex items-center bg-background/80 backdrop-blur-xl border border-border rounded-2xl overflow-hidden">
-                <Search className="w-5 h-5 text-muted-foreground ml-5 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search services — GST, ITR, Registration, Payroll..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                  className="flex-1 px-4 py-4 md:py-5 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base md:text-lg font-body"
-                />
-                <a
-                  href="#services"
-                  className="hidden sm:inline-flex items-center gap-2 px-6 py-3 m-2 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all shrink-0"
-                >
-                  Explore
-                  <ArrowRight className="w-4 h-4" />
-                </a>
+            {/* Glow Aura */}
+            <div className={`absolute -inset-1 bg-primary/20 blur-3xl rounded-full transition-opacity duration-700 ${isFocused ? 'opacity-100' : 'opacity-0'}`} />
+            
+            <div className={`relative flex items-center bg-white/10 backdrop-blur-3xl border-2 transition-all duration-700 rounded-[2rem] px-8 md:px-10 h-20 md:h-24 ${isFocused ? 'border-primary shadow-[0_40px_100px_-20px_rgba(255,69,0,0.4)] bg-white/20' : 'border-white/20 shadow-2xl shadow-black/50'}`}>
+              <Search className={`w-8 h-8 mr-6 transition-colors duration-500 ${isFocused ? 'text-primary' : 'text-white/40'}`} />
+              <input 
+                type="text"
+                placeholder="PROMPT: Search for Compliance Services..."
+                className="w-full h-full bg-transparent text-xl md:text-2xl font-display font-medium text-white outline-none placeholder:text-white/20 placeholder:italic"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+              />
+              
+              <div className="hidden md:flex items-center gap-4">
+                <div className="w-px h-12 bg-white/10" />
+                <button className={`p-4 rounded-xl transition-all duration-500 ${isFocused ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-white/10 text-white/40 hover:bg-white/20'}`}>
+                  <ArrowRight className="w-6 h-6" />
+                </button>
               </div>
             </div>
 
-            {/* Search dropdown */}
-            {isFocused && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl border border-border rounded-2xl shadow-[var(--shadow-elevated)] overflow-hidden z-50"
-              >
-                <div className="p-3">
-                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider px-3 py-2">
-                    {searchQuery ? "Results" : "Popular Services"}
-                  </p>
-                  {filteredServices.map((service, i) => (
-                    <a
-                      key={i}
-                      href="#services"
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-accent transition-colors group"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <service.icon className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="text-sm font-medium text-foreground">{service.label}</span>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  ))}
-                  {filteredServices.length === 0 && (
-                    <p className="text-sm text-muted-foreground px-3 py-3">No services found. <a href="#contact" className="text-primary font-semibold hover:underline">Contact us</a> for custom needs.</p>
-                  )}
+            {/* Pulsating Mandatory Indicator */}
+            <div className="mt-10 flex justify-center items-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                  <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
                 </div>
-              </motion.div>
-            )}
-          </motion.div>
-
-          {/* CTA buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
-            className="flex flex-wrap justify-center gap-4 mb-14"
-          >
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold text-lg hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-            >
-              Start Your Journey
-              <ArrowRight className="w-5 h-5" />
-            </a>
-            <a
-              href="#how-we-work"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-foreground/15 text-foreground font-semibold text-lg hover:border-primary hover:text-primary transition-all hover:-translate-y-0.5"
-            >
-              See How We Work
-            </a>
-          </motion.div>
-
-          {/* Stats bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div className="glass-card p-1">
-              <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-                {[
-                  { value: 500, suffix: "+", label: "Businesses Served", icon: Building2 },
-                  { value: 99, suffix: "%", label: "Compliance Rate", icon: CheckCircle2 },
-                  { value: 10, suffix: "+", label: "Years Experience", icon: TrendingUp },
-                  { value: 24, suffix: "h", label: "Avg. Turnaround", icon: Shield },
-                ].map((stat, i) => (
-                  <div key={i} className="flex flex-col items-center py-5 px-4 group">
-                    <stat.icon className="w-5 h-5 text-primary mb-2 opacity-60 group-hover:opacity-100 transition-opacity" />
-                    <div className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                      <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                    </div>
-                    <p className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</p>
-                  </div>
-                ))}
+                <span className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Search Mandatory to Proceed</span>
+              </div>
+              <div className="w-px h-4 bg-white/10" />
+              <div className="flex items-center gap-2 opacity-50">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white">ISO 9001:2015</span>
               </div>
             </div>
           </motion.div>
 
-          {/* Floating service pills */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="hidden lg:flex justify-center gap-3 mt-8 flex-wrap"
-          >
-            {services.map((service, i) => (
-              <motion.a
-                key={i}
-                href="#services"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 + i * 0.08 }}
-                whileHover={{ y: -2, scale: 1.02 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/60 backdrop-blur-sm border border-border text-sm text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors cursor-pointer"
-              >
-                <service.icon className="w-3.5 h-3.5" />
-                {service.label}
-              </motion.a>
-            ))}
-          </motion.div>
-        </div>
+        </motion.div>
       </div>
+
+      {/* Signature technical line */}
+      <div className="absolute bottom-0 left-0 w-full h-[0.5px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
     </section>
   );
 };
