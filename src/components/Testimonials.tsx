@@ -16,10 +16,10 @@ const Testimonials = () => {
   const [current, setCurrent] = useState(0);
 
   return (
-    <section id="testimonials" className="py-24 bg-[#FAFAFA] overflow-hidden">
+    <section id="testimonials" className="pt-12 pb-20 md:pt-14 md:pb-24 bg-[#FAFAFA] overflow-hidden">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Figma Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-display font-black text-slate-900 mb-4 uppercase tracking-tighter">
             Testimonials
           </h2>

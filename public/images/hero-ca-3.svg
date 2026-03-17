@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#070A12"/>
+      <stop offset="0.5" stop-color="#0A1222"/>
+      <stop offset="1" stop-color="#06070C"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520 260) rotate(35) scale(820 520)">
+      <stop stop-color="#F97316" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1500 260) rotate(15) scale(720 520)">
+      <stop stop-color="#FDBA74" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FDBA74" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F97316"/>
+      <stop offset="1" stop-color="#FDBA74"/>
+    </linearGradient>
+    <filter id="shadow" x="-60" y="-60" width="2200" height="1400" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#halo)"/>
+  <rect width="1920" height="1080" fill="url(#halo2)"/>
+
+  <!-- Minimal grid -->
+  <g opacity="0.10">
+    <path d="M0 240H1920" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M0 420H1920" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <path d="M0 600H1920" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <path d="M0 780H1920" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <path d="M320 0V1080" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <path d="M620 0V1080" stroke="#FFFFFF" stroke-opacity="0.05"/>
+    <path d="M920 0V1080" stroke="#FFFFFF" stroke-opacity="0.05"/>
+    <path d="M1220 0V1080" stroke="#FFFFFF" stroke-opacity="0.05"/>
+    <path d="M1520 0V1080" stroke="#FFFFFF" stroke-opacity="0.05"/>
+  </g>
+
+  <!-- Right: clean "service dashboard" -->
+  <g filter="url(#shadow)">
+    <rect x="1130" y="220" width="670" height="640" rx="44" fill="#0B1220" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <rect x="1130" y="220" width="670" height="6" rx="3" fill="url(#accent)"/>
+
+    <!-- Header row -->
+    <g transform="translate(1182 270)">
+      <circle cx="10" cy="12" r="6" fill="#F97316"/>
+      <text x="28" y="16" fill="#FFFFFF" fill-opacity="0.88" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="900" letter-spacing="0.16em">CA SERVICE DESK</text>
+      <text x="0" y="46" fill="#FFFFFF" fill-opacity="0.62" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700" letter-spacing="0.08em">Client-focused compliance & reporting</text>
+    </g>
+
+    <!-- Three stat tiles -->
+    <g transform="translate(1182 340)">
+      <rect x="0" y="0" width="196" height="120" rx="22" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <text x="18" y="38" fill="#FFFFFF" fill-opacity="0.72" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="800" letter-spacing="0.12em">SPEED</text>
+      <text x="18" y="84" fill="#FFFFFF" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="30" font-weight="950">2448h</text>
+    </g>
+    <g transform="translate(1398 340)">
+      <rect x="0" y="0" width="196" height="120" rx="22" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <text x="18" y="38" fill="#FFFFFF" fill-opacity="0.72" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="800" letter-spacing="0.12em">ACCURACY</text>
+      <text x="18" y="84" fill="#FFFFFF" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="30" font-weight="950">99.9%</text>
+    </g>
+    <g transform="translate(1614 340)">
+      <rect x="0" y="0" width="136" height="120" rx="22" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <path d="M68 28c20 12 40 9 40 9v44c0 30-20 48-40 58-20-10-40-28-40-58V37s20 3 40-9Z" fill="url(#accent)"/>
+      <path d="M56 68l10 10 22-26" stroke="#0B1220" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Timeline list -->
+    <g transform="translate(1182 496)">
+      <text x="0" y="16" fill="#FFFFFF" fill-opacity="0.70" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="900" letter-spacing="0.14em">NEXT ACTIONS</text>
+
+      <g transform="translate(0 34)">
+        <rect x="0" y="0" width="568" height="64" rx="22" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+        <rect x="0" y="0" width="6" height="64" rx="3" fill="url(#accent)"/>
+        <circle cx="28" cy="32" r="10" fill="#F97316"/>
+        <path d="M24 32l3 3 7-9" stroke="#0B1220" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="52" y="28" fill="#FFFFFF" fill-opacity="0.86" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="900">Business Registration</text>
+        <text x="52" y="48" fill="#FFFFFF" fill-opacity="0.62" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700">Private Ltd, LLP, GST, MSME</text>
+      </g>
+
+      <g transform="translate(0 110)">
+        <rect x="0" y="0" width="568" height="64" rx="22" fill="#FFFFFF" fill-opacity="0.045" stroke="#FFFFFF" stroke-opacity="0.10"/>
+        <rect x="0" y="0" width="6" height="64" rx="3" fill="#FDBA74" fill-opacity="0.8"/>
+        <circle cx="28" cy="32" r="10" fill="#FDBA74"/>
+        <path d="M24 32l3 3 7-9" stroke="#0B1220" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="52" y="28" fill="#FFFFFF" fill-opacity="0.84" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="900">Monthly Compliance</text>
+        <text x="52" y="48" fill="#FFFFFF" fill-opacity="0.60" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700">ROC, GST returns, filings</text>
+      </g>
+
+      <g transform="translate(0 186)">
+        <rect x="0" y="0" width="568" height="64" rx="22" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.10"/>
+        <rect x="0" y="0" width="6" height="64" rx="3" fill="#FFFFFF" fill-opacity="0.20"/>
+        <circle cx="28" cy="32" r="10" fill="#FFFFFF" fill-opacity="0.16"/>
+        <text x="52" y="28" fill="#FFFFFF" fill-opacity="0.80" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="900">Audit & Reporting</text>
+        <text x="52" y="48" fill="#FFFFFF" fill-opacity="0.58" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700">MIS, internal audit, due diligence</text>
+      </g>
+    </g>
+
+    <!-- Bottom seal -->
+    <g transform="translate(1680 760)">
+      <circle cx="60" cy="60" r="60" fill="#0B1220" fill-opacity="0.65" stroke="#FFFFFF" stroke-opacity="0.14"/>
+      <circle cx="60" cy="60" r="48" fill="none" stroke="url(#accent)" stroke-width="5" stroke-dasharray="12 10"/>
+      <text x="60" y="68" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="28" font-weight="1000">CA</text>
+      <text x="60" y="92" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.66" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="9" font-weight="900" letter-spacing="0.22em">TRUST</text>
+    </g>
+  </g>
+</svg>

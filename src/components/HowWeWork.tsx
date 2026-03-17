@@ -104,25 +104,25 @@ const HowWeWork = () => {
   const beaconY = useTransform(pathLength, [0, 1], ["0%", "100%"]);
 
   return (
-    <section id="how-we-work" ref={containerRef} className="section-padding bg-white relative overflow-hidden">
+    <section id="how-we-work" ref={containerRef} className="section-padding bg-white relative overflow-hidden pb-6 md:pb-8 pt-2 md:pt-4">
       {/* Background Architectural Mesh */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#0F172A 1.5px, transparent 1.5px)', backgroundSize: '60px 60px' }} />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10 py-10">
+      <div className="container mx-auto px-4 relative z-10 py-3 md:py-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center mb-24 md:mb-32"
+          className="max-w-4xl mx-auto text-center mb-8 md:mb-10"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 shadow-xl mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 shadow-xl mb-3">
             <Target className="w-3 h-3 text-primary" />
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Execution Framework</span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight text-slate-900 leading-none">
+          <h2 className="text-4xl md:text-6xl font-display font-bold mb-3 tracking-tight text-slate-900 leading-none">
             Efficiency <span className="text-primary font-serif italic">by Design.</span>
           </h2>
           <p className="text-lg md:text-2xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-body font-light">
@@ -168,7 +168,7 @@ const HowWeWork = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center mt-20"
+          className="text-center mt-6"
         >
           <div className="inline-flex items-center gap-6 px-12 py-6 bg-white border border-slate-100 rounded-3xl shadow-2xl shadow-slate-900/5">
             <div className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-xl">

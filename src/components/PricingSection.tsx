@@ -30,13 +30,13 @@ const plans = [
 
 const PricingSection = () => {
   return (
-    <section className="section-padding">
+    <section className="section-padding pb-6 md:pb-8">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 md:mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
             Simple Pricing
@@ -49,7 +49,7 @@ const PricingSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 md:gap-7 max-w-5xl mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -57,7 +57,7 @@ const PricingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.15 }}
-              className={`relative rounded-3xl p-8 transition-all duration-300 hover:-translate-y-2 ${
+              className={`relative rounded-3xl p-7 md:p-8 transition-all duration-300 hover:-translate-y-2 ${
                 plan.popular
                   ? "bg-foreground text-primary-foreground shadow-2xl scale-105"
                   : "glass-card"

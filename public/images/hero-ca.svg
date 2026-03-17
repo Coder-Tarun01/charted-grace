@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1220"/>
+      <stop offset="0.55" stop-color="#0A0F1B"/>
+      <stop offset="1" stop-color="#070A12"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520 310) rotate(35) scale(640 420)">
+      <stop stop-color="#F97316" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1420 210) rotate(20) scale(540 380)">
+      <stop stop-color="#FDBA74" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FDBA74" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowC" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1280 760) rotate(-10) scale(720 520)">
+      <stop stop-color="#F97316" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-40" y="-40" width="2000" height="1200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="shadow" x="-50" y="-50" width="2100" height="1300" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F97316"/>
+      <stop offset="1" stop-color="#FDBA74"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#glowA)"/>
+  <rect width="1920" height="1080" fill="url(#glowB)"/>
+  <rect width="1920" height="1080" fill="url(#glowC)"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.12">
+    <path d="M0 190H1920" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <path d="M0 370H1920" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M0 550H1920" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M0 730H1920" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M0 910H1920" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M220 0V1080" stroke="#FFFFFF" stroke-opacity="0.09"/>
+    <path d="M460 0V1080" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <path d="M700 0V1080" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <path d="M940 0V1080" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <path d="M1180 0V1080" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <path d="M1420 0V1080" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <path d="M1660 0V1080" stroke="#FFFFFF" stroke-opacity="0.06"/>
+  </g>
+
+  <!-- Client-focused visual: handshake + shield + growth chart -->
+  <g filter="url(#shadow)">
+    <!-- Card -->
+    <rect x="1180" y="250" width="560" height="580" rx="36" fill="#0B1220" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <rect x="1180" y="250" width="560" height="6" rx="3" fill="url(#accent)"/>
+
+    <!-- Growth chart -->
+    <g transform="translate(1228 308)">
+      <rect x="0" y="0" width="464" height="220" rx="22" fill="#0B1220" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <g opacity="0.8">
+        <path d="M34 170L120 128L202 146L292 92L360 112L430 56" stroke="url(#accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="120" cy="128" r="5.5" fill="#FDBA74"/>
+        <circle cx="292" cy="92" r="5.5" fill="#F97316"/>
+        <circle cx="430" cy="56" r="5.5" fill="#FDBA74"/>
+      </g>
+      <g opacity="0.35">
+        <path d="M34 190V40" stroke="#FFFFFF" stroke-opacity="0.25"/>
+        <path d="M34 190H430" stroke="#FFFFFF" stroke-opacity="0.25"/>
+        <path d="M118 190V40" stroke="#FFFFFF" stroke-opacity="0.10"/>
+        <path d="M202 190V40" stroke="#FFFFFF" stroke-opacity="0.10"/>
+        <path d="M286 190V40" stroke="#FFFFFF" stroke-opacity="0.10"/>
+        <path d="M370 190V40" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      </g>
+      <text x="28" y="32" fill="#FFFFFF" fill-opacity="0.7" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" letter-spacing="0.08em">CLIENT OUTCOMES</text>
+    </g>
+
+    <!-- Handshake icon -->
+    <g transform="translate(1260 575)">
+      <rect x="0" y="0" width="300" height="220" rx="26" fill="#0B1220" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <path d="M78 128c18-18 44-18 62 0l12 12c10 10 26 10 36 0l54-54c10-10 26-10 36 0" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="8" stroke-linecap="round"/>
+      <path d="M54 104l38-38c12-12 32-12 44 0l24 24" stroke="#F97316" stroke-width="8" stroke-linecap="round"/>
+      <path d="M246 156l38-38c12-12 12-32 0-44l-12-12" stroke="#FDBA74" stroke-width="8" stroke-linecap="round"/>
+      <path d="M118 162l22 22c10 10 26 10 36 0l18-18" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="8" stroke-linecap="round"/>
+      <text x="26" y="44" fill="#FFFFFF" fill-opacity="0.7" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="800" letter-spacing="0.08em">CLIENT-FIRST</text>
+    </g>
+
+    <!-- Shield badge -->
+    <g transform="translate(1588 575)">
+      <rect x="0" y="0" width="128" height="220" rx="26" fill="#0B1220" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <path d="M64 56c22 14 44 10 44 10v56c0 38-22 60-44 72-22-12-44-34-44-72V66s22 4 44-10Z" fill="url(#accent)" opacity="0.95"/>
+      <path d="M46 118l12 12 28-32" stroke="#0B1220" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="20" y="204" fill="#FFFFFF" fill-opacity="0.7" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="900" letter-spacing="0.14em">TRUST</text>
+    </g>
+  </g>
+
+  <!-- Foreground soft noise -->
+  <g opacity="0.10" filter="url(#soft)">
+    <circle cx="280" cy="820" r="120" fill="#FFFFFF"/>
+    <circle cx="520" cy="860" r="80" fill="#FFFFFF"/>
+    <circle cx="780" cy="880" r="100" fill="#FFFFFF"/>
+  </g>
+</svg>

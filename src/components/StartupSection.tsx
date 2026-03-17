@@ -29,34 +29,34 @@ const Card = ({ step, index }: { step: any; index: number }) => {
   const opacity = useTransform(scrollYProgress, [0, 0.4, 1], [0.8, 1, 1]);
 
   return (
-    <div ref={container} className="h-[85vh] flex items-center justify-center sticky top-0 px-4 md:px-8">
+    <div ref={container} className="h-[75vh] flex items-center justify-center sticky top-0 px-4 md:px-8">
       <motion.div
         style={{ 
           scale,
           opacity,
           top: `${index * 32}px`,
         }}
-        className="w-full max-w-7xl bg-white border-[0.5px] border-primary/30 rounded-[32px] md:rounded-[60px] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] relative group"
+        className="w-full max-w-4xl bg-white border-[0.5px] border-primary/30 rounded-[32px] md:rounded-[60px] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] relative group"
       >
-        <div className="flex flex-col lg:flex-row items-center h-full min-h-[500px] md:min-h-[650px]">
+        <div className="flex flex-col lg:flex-row items-center h-full min-h-[420px] md:min-h-[520px]">
           {/* Illustration Section */}
-          <div className="w-full lg:w-1/2 h-full bg-accent/20 flex items-center justify-center p-12 md:p-20 border-b lg:border-b-0 lg:border-r-[0.5px] border-primary/30">
-            <div className="w-full max-w-[350px] md:max-w-[500px] transition-transform duration-700 group-hover:scale-105">
+          <div className="w-full lg:w-1/2 h-full bg-accent/20 flex items-center justify-center p-10 md:p-14 border-b lg:border-b-0 lg:border-r-[0.5px] border-primary/30">
+            <div className="w-full max-w-[300px] md:max-w-[420px] transition-transform duration-700 group-hover:scale-105">
               {step.illustration}
             </div>
           </div>
           
           {/* Content Section */}
-          <div className="w-full lg:w-1/2 p-12 md:p-24 flex flex-col justify-center">
-            <div className="mb-8 md:mb-12">
-              <span className="text-primary font-display font-black text-6xl md:text-8xl opacity-10">
+          <div className="w-full lg:w-1/2 p-10 md:p-14 flex flex-col justify-center">
+            <div className="mb-6 md:mb-8">
+              <span className="text-primary font-display font-black text-5xl md:text-7xl opacity-10">
                 0{index + 1}
               </span>
             </div>
-            <h3 className="text-4xl md:text-6xl font-display font-bold mb-8 text-foreground leading-tight">
+            <h3 className="text-3xl md:text-5xl font-display font-bold mb-6 text-foreground leading-tight">
               {step.title}
             </h3>
-            <p className="text-xl md:text-3xl text-muted-foreground leading-relaxed font-body">
+            <p className="text-lg md:text-2xl text-muted-foreground leading-relaxed font-body">
               {step.desc}
             </p>
           </div>
@@ -105,7 +105,7 @@ const StartupSection = () => {
       </div>
 
       {/* Extra space for final card scroll-out feel */}
-      <div className="h-[5vh]" />
+      <div className="h-[15vh]" />
     </section>
   );
 };

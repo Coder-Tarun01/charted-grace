@@ -43,13 +43,13 @@ const reasons = [
 
 const WhyChooseUs = () => {
   return (
-    <section className="py-24 bg-white" id="why-choose-us">
+    <section className="py-10 md:py-12 bg-white" id="why-choose-us">
       <div className="container mx-auto px-4 max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-20"
+          className="text-center mb-7 md:mb-8"
         >
           <h2 className="text-4xl md:text-5xl font-display font-bold mb-4 text-[#1A1A1A]">
             Why Choose Us?
@@ -59,7 +59,7 @@ const WhyChooseUs = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-9">
           {reasons.map((item, i) => (
             <motion.div
               key={item.title}
