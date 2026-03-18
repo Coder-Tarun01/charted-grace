@@ -49,17 +49,17 @@ const StepCard = ({ step, index, progress }: { step: any; index: number; progres
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full md:w-[45%] text-center md:text-left"
+        className="w-full md:w-[45%] text-center md:text-left rounded-3xl border border-slate-200 bg-white/80 px-5 py-6 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.55)]"
       >
-        <div className={`flex flex-col ${isEven ? 'md:items-start' : 'md:items-end'} mb-6 md:mb-8`}>
+        <div className={`flex flex-col ${isEven ? 'md:items-start' : 'md:items-end'} mb-5 md:mb-6`}>
           <span className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-4">
             {step.step} • {step.label}
           </span>
-          <h3 className="text-3xl md:text-5xl font-display font-bold text-slate-900 leading-tight">
+          <h3 className="text-2xl md:text-3xl font-display font-bold text-slate-900 leading-tight">
             {step.title}
           </h3>
         </div>
-        <p className={`text-lg md:text-xl text-slate-500 leading-relaxed font-body font-light max-w-lg ${!isEven && 'md:ml-auto md:text-right'}`}>
+        <p className={`text-base md:text-lg text-slate-500 leading-relaxed font-body font-light max-w-lg ${!isEven && 'md:ml-auto md:text-right'}`}>
           {step.desc}
         </p>
       </motion.div>
@@ -122,7 +122,7 @@ const HowWeWork = () => {
             <Target className="w-3 h-3 text-primary" />
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Execution Framework</span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-display font-bold mb-3 tracking-tight text-slate-900 leading-none">
+          <h2 className="text-3xl md:text-5xl font-display font-bold mb-3 tracking-tight text-slate-900 leading-none">
             Efficiency <span className="text-primary font-serif italic">by Design.</span>
           </h2>
           <p className="text-lg md:text-2xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-body font-light">

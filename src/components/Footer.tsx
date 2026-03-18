@@ -55,9 +55,9 @@ const Footer = () => {
             <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary"
+              className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:bg-orange-deep transition-colors shadow-lg shadow-primary/20"
             >
-              <ArrowUp className="w-4 h-4" />
+              <ArrowUp className="w-5 h-5 text-white" strokeWidth={2.6} />
             </button>
           </div>
         </div>
