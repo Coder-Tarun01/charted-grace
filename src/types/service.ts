@@ -1,3 +1,5 @@
+import type { ServiceTemplateId } from "@/config/serviceTemplates";
+
 export type Service = {
   id: string;
   module: string;
@@ -14,8 +16,12 @@ export type Service = {
   ctaHeadline: string;
   ctaSubtext: string;
   ctaButtonLabel: string;
+  templateId?: ServiceTemplateId;
   heroBannerImage: string;
   heroRightImage: string;
+  overviewImage?: string;
+  featuresImage?: string;
+  benefitsImage?: string;
 };
 
 export type ServiceInput = {
@@ -30,8 +36,12 @@ export type ServiceInput = {
   features: string[];
   benefits: string[];
   process: string[];
+  templateId?: ServiceTemplateId;
   heroBannerImage?: string;
   heroRightImage?: string;
+  overviewImage?: string;
+  featuresImage?: string;
+  benefitsImage?: string;
 };
 
 export type NavMenuItem = { name: string; href: string };

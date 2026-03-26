@@ -1,5 +1,7 @@
 import { slugify } from "@/lib/slug";
 import { menuSeed } from "@/data/menuSeed";
+import { DEFAULT_HERO_BANNER_IMAGE, DEFAULT_SECTION_IMAGE } from "@/config/serviceTemplateImages";
+import { DEFAULT_SERVICE_TEMPLATE_ID } from "@/config/serviceTemplates";
 import type { NavMenuItem, NavMenuModule, NavMenuSection, Service, ServiceInput } from "@/types/service";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
@@ -20,8 +22,7 @@ const DEFAULT_CTA = {
   ctaButtonLabel: "Get free consultation",
 } as const;
 
-const DEFAULT_HERO_BANNER_IMAGE = "/images/hero-ca-3.svg";
-const DEFAULT_HERO_RIGHT_IMAGE = "/images/hero-ca.svg";
+const DEFAULT_HERO_RIGHT_IMAGE = DEFAULT_SECTION_IMAGE;
 
 function toTitleCase(text: string) {
   return text
@@ -110,8 +111,12 @@ function normalizeInput(input: ServiceInput, existing: Service[], ignoreId?: str
     features: input.features.filter(Boolean),
     benefits: input.benefits.filter(Boolean),
     process: input.process.filter(Boolean),
+    templateId: input.templateId ?? DEFAULT_SERVICE_TEMPLATE_ID,
     heroBannerImage: input.heroBannerImage?.trim() || DEFAULT_HERO_BANNER_IMAGE,
     heroRightImage: input.heroRightImage?.trim() || DEFAULT_HERO_RIGHT_IMAGE,
+    overviewImage: input.overviewImage?.trim() || input.heroRightImage?.trim() || DEFAULT_SECTION_IMAGE,
+    featuresImage: input.featuresImage?.trim() || input.heroBannerImage?.trim() || DEFAULT_HERO_BANNER_IMAGE,
+    benefitsImage: input.benefitsImage?.trim() || input.heroRightImage?.trim() || DEFAULT_SECTION_IMAGE,
     ...DEFAULT_CTA,
   };
 }
@@ -336,9 +341,8 @@ export function buildNavServicesMenu(services: Service[]): NavMenuModule[] {
 }
 
 /** Prefer DB-backed links; fall back to seed menu so the header never goes empty. */
-export function buildEffectiveNavMenu(services: Service[]): NavMenuModule[] {
-  const fromDb = buildNavServicesMenu(services);
-  if (fromDb.length > 0) return applyMenuSeedOrdering(fromDb);
+export function buildEffectiveNavMenu(_services: Service[]): NavMenuModule[] {
+  // Keep navbar structure stable and unchanged; page content still loads from DB by route.
   return applyMenuSeedOrdering(buildNavMenuFromSeed());
 }
 

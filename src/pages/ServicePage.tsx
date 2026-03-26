@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import ServiceTemplate from "@/templates/ServiceTemplate";
+import ServiceTemplateRenderer from "@/templates/ServiceTemplateRenderer";
 import SiteLayout from "@/components/SiteLayout";
 import { fetchServiceDetail } from "@/lib/serviceStore";
 import ServiceComingSoon from "@/components/service/ServiceComingSoon";
@@ -98,7 +98,7 @@ export default function ServicePage() {
       {isDefaultPlaceholder(state.service) ? (
         <ServiceComingSoon title={state.service.title} />
       ) : (
-        <ServiceTemplate service={state.service} />
+        <ServiceTemplateRenderer service={state.service} />
       )}
     </SiteLayout>
   );

@@ -53,6 +53,7 @@ async function ensureServicesTable() {
       category_label TEXT NOT NULL,
       slug TEXT NOT NULL,
       title TEXT NOT NULL,
+      template_id TEXT NOT NULL DEFAULT 'classic',
       introduction TEXT NOT NULL,
       overview TEXT NOT NULL,
       features TEXT[] NOT NULL DEFAULT '{}',
@@ -63,15 +64,30 @@ async function ensureServicesTable() {
       cta_button_label TEXT NOT NULL,
       hero_banner_image TEXT NOT NULL,
       hero_right_image TEXT NOT NULL,
+      overview_image TEXT NOT NULL DEFAULT '/images/hero-ca.svg',
+      features_image TEXT NOT NULL DEFAULT '/images/hero-ca-3.svg',
+      benefits_image TEXT NOT NULL DEFAULT '/images/hero-ca.svg',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
 
+  await pool.query(
+    `ALTER TABLE services ADD COLUMN IF NOT EXISTS overview_image TEXT NOT NULL DEFAULT '/images/hero-ca.svg'`,
+  );
+  await pool.query(
+    `ALTER TABLE services ADD COLUMN IF NOT EXISTS features_image TEXT NOT NULL DEFAULT '/images/hero-ca-3.svg'`,
+  );
+  await pool.query(
+    `ALTER TABLE services ADD COLUMN IF NOT EXISTS benefits_image TEXT NOT NULL DEFAULT '/images/hero-ca.svg'`,
+  );
+
   await pool.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS services_module_slug_uniq
     ON services (module, slug);
   `);
+
+  await pool.query(`ALTER TABLE services ADD COLUMN IF NOT EXISTS template_id TEXT NOT NULL DEFAULT 'classic'`);
 }
 
 function rowToService(row) {
@@ -83,6 +99,7 @@ function rowToService(row) {
     categoryLabel: row.category_label,
     slug: row.slug,
     title: row.title,
+    templateId: row.template_id || "classic",
     introduction: row.introduction,
     overview: row.overview,
     features: row.features || [],
@@ -93,6 +110,9 @@ function rowToService(row) {
     ctaButtonLabel: row.cta_button_label,
     heroBannerImage: row.hero_banner_image,
     heroRightImage: row.hero_right_image,
+    overviewImage: row.overview_image,
+    featuresImage: row.features_image,
+    benefitsImage: row.benefits_image,
   };
 }
 
@@ -115,16 +135,18 @@ function normalizePayload(input, services, ignoreId) {
   const title = (input.title || "").trim();
   const categoryLabel = (input.categoryLabel || "General").trim() || "General";
   const category = slugify(input.category || categoryLabel) || "general";
-  const slug = ensureUniqueSlug(services, module, slugify(input.slug || title), ignoreId);
+  const slug = slugify(input.slug || title) || "service";
+  const existingBySlug = services.find((s) => s.module === module && s.slug === slug);
 
   return {
-    id: ignoreId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: ignoreId || existingBySlug?.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     module,
     moduleTitle: (input.moduleTitle || module).trim(),
     category,
     categoryLabel,
     slug,
     title,
+    templateId: (input.templateId || "classic").trim(),
     introduction: (input.introduction || "").trim(),
     overview: (input.overview || "").trim(),
     features: Array.isArray(input.features) ? input.features.filter(Boolean) : [],
@@ -135,6 +157,9 @@ function normalizePayload(input, services, ignoreId) {
     ctaButtonLabel: "Get free consultation",
     heroBannerImage: (input.heroBannerImage || "/images/hero-ca-3.svg").trim(),
     heroRightImage: (input.heroRightImage || "/images/hero-ca.svg").trim(),
+    overviewImage: (input.overviewImage || input.heroRightImage || "/images/hero-ca.svg").trim(),
+    featuresImage: (input.featuresImage || input.heroBannerImage || "/images/hero-ca-3.svg").trim(),
+    benefitsImage: (input.benefitsImage || input.heroRightImage || "/images/hero-ca.svg").trim(),
   };
 }
 
@@ -217,12 +242,13 @@ async function upsertService(service) {
   await pool.query(
     `
       INSERT INTO services (
-        id, module, module_title, category, category_label, slug, title,
+        id, module, module_title, category, category_label, slug, title, template_id,
         introduction, overview, features, benefits, process,
-        cta_headline, cta_subtext, cta_button_label, hero_banner_image, hero_right_image
+        cta_headline, cta_subtext, cta_button_label, hero_banner_image, hero_right_image,
+        overview_image, features_image, benefits_image
       )
       VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21
       )
       ON CONFLICT (module, slug)
       DO UPDATE SET
@@ -230,6 +256,7 @@ async function upsertService(service) {
         category = EXCLUDED.category,
         category_label = EXCLUDED.category_label,
         title = EXCLUDED.title,
+        template_id = EXCLUDED.template_id,
         introduction = EXCLUDED.introduction,
         overview = EXCLUDED.overview,
         features = EXCLUDED.features,
@@ -240,6 +267,9 @@ async function upsertService(service) {
         cta_button_label = EXCLUDED.cta_button_label,
         hero_banner_image = EXCLUDED.hero_banner_image,
         hero_right_image = EXCLUDED.hero_right_image,
+        overview_image = EXCLUDED.overview_image,
+        features_image = EXCLUDED.features_image,
+        benefits_image = EXCLUDED.benefits_image,
         updated_at = NOW()
     `,
     [
@@ -250,6 +280,7 @@ async function upsertService(service) {
       service.categoryLabel,
       service.slug,
       service.title,
+      service.templateId,
       service.introduction,
       service.overview,
       service.features,
@@ -260,6 +291,9 @@ async function upsertService(service) {
       service.ctaButtonLabel,
       service.heroBannerImage,
       service.heroRightImage,
+      service.overviewImage,
+      service.featuresImage,
+      service.benefitsImage,
     ],
   );
 }
@@ -269,11 +303,12 @@ async function insertPlaceholderIfMissing(service) {
   await pool.query(
     `
       INSERT INTO services (
-        id, module, module_title, category, category_label, slug, title,
+        id, module, module_title, category, category_label, slug, title, template_id,
         introduction, overview, features, benefits, process,
-        cta_headline, cta_subtext, cta_button_label, hero_banner_image, hero_right_image
+        cta_headline, cta_subtext, cta_button_label, hero_banner_image, hero_right_image,
+        overview_image, features_image, benefits_image
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
       ON CONFLICT (module, slug) DO NOTHING
     `,
     [
@@ -284,6 +319,7 @@ async function insertPlaceholderIfMissing(service) {
       service.categoryLabel,
       service.slug,
       service.title,
+      service.templateId,
       service.introduction,
       service.overview,
       service.features,
@@ -294,6 +330,9 @@ async function insertPlaceholderIfMissing(service) {
       service.ctaButtonLabel,
       service.heroBannerImage,
       service.heroRightImage,
+      service.overviewImage,
+      service.featuresImage,
+      service.benefitsImage,
     ],
   );
 }
@@ -395,16 +434,20 @@ app.put("/services/:id", async (req, res) => {
         category_label = $5,
         slug = $6,
         title = $7,
-        introduction = $8,
-        overview = $9,
-        features = $10,
-        benefits = $11,
-        process = $12,
-        cta_headline = $13,
-        cta_subtext = $14,
-        cta_button_label = $15,
-        hero_banner_image = $16,
-        hero_right_image = $17,
+        template_id = $8,
+        introduction = $9,
+        overview = $10,
+        features = $11,
+        benefits = $12,
+        process = $13,
+        cta_headline = $14,
+        cta_subtext = $15,
+        cta_button_label = $16,
+        hero_banner_image = $17,
+        hero_right_image = $18,
+        overview_image = $19,
+        features_image = $20,
+        benefits_image = $21,
         updated_at = NOW()
       WHERE id = $1
     `,
@@ -416,6 +459,7 @@ app.put("/services/:id", async (req, res) => {
       next.categoryLabel,
       next.slug,
       next.title,
+      next.templateId,
       next.introduction,
       next.overview,
       next.features,
@@ -426,6 +470,9 @@ app.put("/services/:id", async (req, res) => {
       next.ctaButtonLabel,
       next.heroBannerImage,
       next.heroRightImage,
+      next.overviewImage,
+      next.featuresImage,
+      next.benefitsImage,
     ],
   );
   apiLog("PUT", `/services/${req.params.id}`, `→ 200 ${next.module}/${next.slug}`);

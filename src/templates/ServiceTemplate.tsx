@@ -37,10 +37,15 @@ export default function ServiceTemplate({ service }: ServiceTemplateProps) {
     ctaButtonLabel,
     heroBannerImage,
     heroRightImage,
+    overviewImage,
+    featuresImage,
+    benefitsImage,
   } = service;
   const highlights = buildHighlights(service);
   const bannerImage = heroBannerImage || "/images/hero-ca-3.svg";
-  const rightImage = heroRightImage || "/images/hero-ca.svg";
+  const overviewSectionImage = overviewImage || heroRightImage || "/images/hero-ca.svg";
+  const featuresSectionImage = featuresImage || bannerImage;
+  const benefitsSectionImage = benefitsImage || heroRightImage || "/images/hero-ca.svg";
 
   return (
     <article>
@@ -93,7 +98,7 @@ export default function ServiceTemplate({ service }: ServiceTemplateProps) {
           <ServiceSection
             heading="Overview"
             content={overview}
-            image={rightImage}
+            image={overviewSectionImage}
             imagePosition="left"
           />
 
@@ -101,7 +106,7 @@ export default function ServiceTemplate({ service }: ServiceTemplateProps) {
           <ServiceSection
             heading="Key Features"
             content="Core capabilities delivered in a practical, execution-focused manner."
-            image={bannerImage}
+            image={featuresSectionImage}
             imagePosition="right"
             listItems={features}
           />
@@ -110,7 +115,7 @@ export default function ServiceTemplate({ service }: ServiceTemplateProps) {
           <ServiceSection
             heading="Why Choose Us"
             content="Outcome-oriented delivery with compliance confidence, business clarity, and strong execution support."
-            image={rightImage}
+            image={benefitsSectionImage}
             imagePosition="left"
             listItems={benefits}
           />
