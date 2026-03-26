@@ -90,6 +90,29 @@ async function ensureServicesTable() {
   await pool.query(`ALTER TABLE services ADD COLUMN IF NOT EXISTS template_id TEXT NOT NULL DEFAULT 'classic'`);
 }
 
+async function ensureBlogsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS blogs (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      featured_image TEXT NOT NULL DEFAULT '',
+      short_description TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL DEFAULT '',
+      tags TEXT[] NOT NULL DEFAULT '{}',
+      category TEXT NOT NULL DEFAULT 'General',
+      meta_title TEXT NOT NULL DEFAULT '',
+      meta_description TEXT NOT NULL DEFAULT '',
+      keywords TEXT NOT NULL DEFAULT '',
+      author TEXT NOT NULL DEFAULT 'Admin',
+      publish_date DATE NOT NULL DEFAULT CURRENT_DATE,
+      status TEXT NOT NULL DEFAULT 'draft',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+}
+
 function rowToService(row) {
   return {
     id: row.id,
@@ -113,6 +136,75 @@ function rowToService(row) {
     overviewImage: row.overview_image,
     featuresImage: row.features_image,
     benefitsImage: row.benefits_image,
+  };
+}
+
+function rowToBlog(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    featuredImage: row.featured_image,
+    shortDescription: row.short_description,
+    content: row.content,
+    tags: row.tags || [],
+    category: row.category,
+    metaTitle: row.meta_title,
+    metaDescription: row.meta_description,
+    keywords: row.keywords,
+    author: row.author,
+    publishDate: row.publish_date,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+async function getExistingBlogs() {
+  const result = await pool.query(`SELECT * FROM blogs`);
+  return result.rows.map(rowToBlog);
+}
+
+function ensureUniqueBlogSlug(blogs, baseSlug, ignoreId) {
+  const safeBase = baseSlug || "blog-post";
+  let candidate = safeBase;
+  let idx = 2;
+  while (blogs.some((b) => b.slug === candidate && b.id !== ignoreId)) {
+    candidate = `${safeBase}-${idx++}`;
+  }
+  return candidate;
+}
+
+function normalizeBlogPayload(input, blogs, ignoreId) {
+  const title = (input.title || "").trim();
+  const baseSlug = slugify(input.slug || title || "blog-post");
+  const slug = ensureUniqueBlogSlug(blogs, baseSlug, ignoreId);
+  const featuredImage = (input.featuredImage || "").trim();
+  const shortDescription = (input.shortDescription || "").trim();
+  const content = (input.content || "").trim();
+  const tags = Array.isArray(input.tags) ? input.tags.map((t) => String(t).trim()).filter(Boolean) : [];
+  const category = (input.category || "General").trim() || "General";
+  const metaTitle = (input.metaTitle || title).trim();
+  const metaDescription = (input.metaDescription || shortDescription).trim();
+  const keywords = (input.keywords || tags.join(", ")).trim();
+  const author = (input.author || "Admin").trim() || "Admin";
+  const publishDate = (input.publishDate || new Date().toISOString().slice(0, 10)).trim();
+  const status = input.status === "published" ? "published" : "draft";
+
+  return {
+    id: ignoreId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title,
+    slug,
+    featuredImage,
+    shortDescription,
+    content,
+    tags,
+    category,
+    metaTitle,
+    metaDescription,
+    keywords,
+    author,
+    publishDate,
+    status,
   };
 }
 
@@ -516,6 +608,168 @@ app.post("/admin/seed-services", async (req, res) => {
   }
 });
 
+app.post("/blogs", async (req, res) => {
+  apiLog("POST", "/blogs", "create blog");
+  try {
+    const existing = await getExistingBlogs();
+    const next = normalizeBlogPayload(req.body, existing);
+    await pool.query(
+      `
+        INSERT INTO blogs (
+          id, title, slug, featured_image, short_description, content, tags, category,
+          meta_title, meta_description, keywords, author, publish_date, status
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+      `,
+      [
+        next.id,
+        next.title,
+        next.slug,
+        next.featuredImage,
+        next.shortDescription,
+        next.content,
+        next.tags,
+        next.category,
+        next.metaTitle,
+        next.metaDescription,
+        next.keywords,
+        next.author,
+        next.publishDate,
+        next.status,
+      ],
+    );
+    apiLog("POST", "/blogs", `→ 201 ${next.slug}`);
+    return res.status(201).json(next);
+  } catch (err) {
+    console.error("[api] POST /blogs failed:", err);
+    return res.status(500).json({ message: "Failed to create blog" });
+  }
+});
+
+app.get("/blogs", async (req, res) => {
+  const page = Math.max(1, Number(req.query.page || 1));
+  const limit = Math.min(20, Math.max(1, Number(req.query.limit || 9)));
+  const offset = (page - 1) * limit;
+  const search = String(req.query.search || "").trim();
+  const category = String(req.query.category || "").trim();
+  const status = String(req.query.status || "").trim();
+  apiLog("GET", "/blogs", `page=${page} limit=${limit} search=${search || "-"} category=${category || "-"}`);
+  try {
+    const conditions = [];
+    const params = [];
+    let idx = 1;
+    if (search) {
+      conditions.push(`(title ILIKE $${idx} OR short_description ILIKE $${idx})`);
+      params.push(`%${search}%`);
+      idx += 1;
+    }
+    if (category) {
+      conditions.push(`category = $${idx}`);
+      params.push(category);
+      idx += 1;
+    }
+    if (status) {
+      conditions.push(`status = $${idx}`);
+      params.push(status);
+      idx += 1;
+    }
+    const whereSql = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const totalResult = await pool.query(`SELECT COUNT(*)::int AS count FROM blogs ${whereSql}`, params);
+    const total = totalResult.rows[0]?.count || 0;
+
+    const listResult = await pool.query(
+      `SELECT * FROM blogs ${whereSql} ORDER BY publish_date DESC, created_at DESC LIMIT $${idx} OFFSET $${idx + 1}`,
+      [...params, limit, offset],
+    );
+    const rows = listResult.rows.map(rowToBlog);
+    return res.json({ items: rows, page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) });
+  } catch (err) {
+    console.error("[api] GET /blogs failed:", err);
+    return res.status(500).json({ message: "Failed to load blogs" });
+  }
+});
+
+app.get("/blogs/:slug", async (req, res) => {
+  const { slug } = req.params;
+  apiLog("GET", "/blogs/:slug", slug);
+  try {
+    const result = await pool.query(`SELECT * FROM blogs WHERE slug = $1 LIMIT 1`, [slug]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    return res.json(rowToBlog(result.rows[0]));
+  } catch (err) {
+    console.error(`[api] GET /blogs/${slug} failed:`, err);
+    return res.status(500).json({ message: "Failed to load blog" });
+  }
+});
+
+app.put("/blogs/:id", async (req, res) => {
+  const { id } = req.params;
+  apiLog("PUT", "/blogs/:id", id);
+  try {
+    const existing = await getExistingBlogs();
+    const found = existing.find((b) => b.id === id);
+    if (!found) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    const next = normalizeBlogPayload(req.body, existing, id);
+    await pool.query(
+      `
+        UPDATE blogs
+        SET
+          title = $2,
+          slug = $3,
+          featured_image = $4,
+          short_description = $5,
+          content = $6,
+          tags = $7,
+          category = $8,
+          meta_title = $9,
+          meta_description = $10,
+          keywords = $11,
+          author = $12,
+          publish_date = $13,
+          status = $14,
+          updated_at = NOW()
+        WHERE id = $1
+      `,
+      [
+        id,
+        next.title,
+        next.slug,
+        next.featuredImage,
+        next.shortDescription,
+        next.content,
+        next.tags,
+        next.category,
+        next.metaTitle,
+        next.metaDescription,
+        next.keywords,
+        next.author,
+        next.publishDate,
+        next.status,
+      ],
+    );
+    return res.json(next);
+  } catch (err) {
+    console.error(`[api] PUT /blogs/${id} failed:`, err);
+    return res.status(500).json({ message: "Failed to update blog" });
+  }
+});
+
+app.delete("/blogs/:id", async (req, res) => {
+  const { id } = req.params;
+  apiLog("DELETE", "/blogs/:id", id);
+  try {
+    await pool.query(`DELETE FROM blogs WHERE id = $1`, [id]);
+    return res.status(204).send();
+  } catch (err) {
+    console.error(`[api] DELETE /blogs/${id} failed:`, err);
+    return res.status(500).json({ message: "Failed to delete blog" });
+  }
+});
+
 // Friendly error response for oversized payloads (e.g. large base64 images)
 app.use((err, _req, res, next) => {
   if (err?.type === "entity.too.large" || err?.status === 413) {
@@ -527,7 +781,7 @@ app.use((err, _req, res, next) => {
 });
 
 const PORT = process.env.PORT || 4000;
-ensureServicesTable()
+Promise.all([ensureServicesTable(), ensureBlogsTable()])
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Backend API running on http://localhost:${PORT}`);

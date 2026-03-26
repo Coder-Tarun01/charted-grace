@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound.tsx";
 import ServicePage from "./pages/ServicePage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import AdminLoginPage from "./pages/AdminLoginPage.tsx";
+import BlogListPage from "./pages/BlogListPage.tsx";
+import BlogDetailPage from "./pages/BlogDetailPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ const App = () => (
                 }
               />
               <Route path="/services/:module/:slug" element={<ServicePage />} />
+              <Route path="/blog" element={<BlogListPage />} />
+              <Route path="/blog/:slug" element={<BlogDetailPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

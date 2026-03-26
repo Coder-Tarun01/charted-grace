@@ -76,6 +76,12 @@ const Navbar = () => {
                 </div>
               );
             })}
+            <Link
+              to="/blog"
+              className="px-2 py-1.5 text-[13px] font-bold text-foreground hover:text-primary transition-colors rounded-lg hover:bg-primary/10"
+            >
+              Blog
+            </Link>
           </div>
 
           <div className="hidden lg:flex items-center gap-2">
@@ -171,6 +177,13 @@ const Navbar = () => {
               >
                 Get Free Consultation
               </a>
+              <Link
+                to="/blog"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-full border border-border bg-background px-5 py-3 text-center text-sm font-semibold text-foreground/80 hover:bg-accent hover:text-foreground transition-colors"
+              >
+                Blog
+              </Link>
               <Link
                 to="/admin"
                 onClick={() => setMobileOpen(false)}
