@@ -54,9 +54,9 @@ const Navbar = () => {
                               </div>
                             )}
                             <div className="space-y-0.5">
-                              {section.items.map((item) => (
+                              {section.items.map((item, itemIdx) => (
                                 <Link
-                                  key={item.name}
+                                  key={`${service.title}-${idx}-${itemIdx}-${item.href}`}
                                   to={item.href}
                                   className="group/item block rounded-lg px-2.5 py-2 text-sm text-foreground/75 transition-all hover:text-primary hover:bg-primary/8 hover:translate-x-0.5"
                                 >
@@ -146,9 +146,9 @@ const Navbar = () => {
                               </div>
                             )}
                             <div className="space-y-1">
-                              {section.items.map((item) => (
+                              {section.items.map((item, itemIdx) => (
                                 <Link
-                                  key={item.name}
+                                  key={`${service.title}-m-${idx}-${itemIdx}-${item.href}`}
                                   to={item.href}
                                   onClick={() => setMobileOpen(false)}
                                   className="block rounded-md px-2 py-2 text-sm text-foreground/75 hover:text-primary hover:bg-accent transition-colors"

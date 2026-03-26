@@ -1,8 +1,18 @@
 import { slugify } from "@/lib/slug";
 import { menuSeed } from "@/data/menuSeed";
-import type { NavMenuModule, Service, ServiceInput } from "@/types/service";
+import type { NavMenuItem, NavMenuModule, NavMenuSection, Service, ServiceInput } from "@/types/service";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const SERVICES_CACHE_KEY = "charted-grace-services-v1";
+
+export function getServicesApiBaseUrl() {
+  return API_BASE_URL;
+}
+
+export type ServiceDetailResult =
+  | { kind: "ok"; service: Service }
+  | { kind: "not_found" }
+  | { kind: "error"; message: string };
 
 const DEFAULT_CTA = {
   ctaHeadline: "Ready to get started?",
@@ -31,7 +41,23 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    let errorMessage = `API request failed: ${response.status}`;
+    try {
+      const text = await response.text();
+      if (text) {
+        try {
+          const parsed = JSON.parse(text) as { message?: string };
+          if (parsed?.message) {
+            errorMessage = parsed.message;
+          }
+        } catch {
+          errorMessage = `${errorMessage} - ${text.slice(0, 180)}`;
+        }
+      }
+    } catch {
+      // keep default message
+    }
+    throw new Error(errorMessage);
   }
 
   return (await response.json()) as T;
@@ -90,26 +116,78 @@ function normalizeInput(input: ServiceInput, existing: Service[], ignoreId?: str
   };
 }
 
-export async function getAllServices() {
+function readCachedServices(): Service[] {
+  if (typeof sessionStorage === "undefined") return [];
   try {
-    return await requestJson<Service[]>("/services");
+    const raw = sessionStorage.getItem(SERVICES_CACHE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as Service[];
   } catch {
     return [];
   }
 }
 
-export async function getServiceBySlug(moduleSlug: string, slug: string) {
+/** Sync read for first paint — avoids empty nav / 404 flash while /services is loading. */
+export function getCachedServicesForHydration(): Service[] {
+  return readCachedServices();
+}
+
+function writeCachedServices(services: Service[]) {
+  if (typeof sessionStorage === "undefined") return;
   try {
-    return await requestJson<Service>(`/services/${moduleSlug}/${slug}`);
+    sessionStorage.setItem(SERVICES_CACHE_KEY, JSON.stringify(services));
   } catch {
-    return undefined;
+    /* quota / private mode */
   }
+}
+
+export async function getAllServices() {
+  try {
+    const data = await requestJson<Service[]>("/services");
+    writeCachedServices(data);
+    return data;
+  } catch {
+    const cached = readCachedServices();
+    return cached.length > 0 ? cached : [];
+  }
+}
+
+export async function fetchServiceDetail(moduleSlug: string, slug: string): Promise<ServiceDetailResult> {
+  const path = `/services/${encodeURIComponent(moduleSlug)}/${encodeURIComponent(slug)}`;
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    if (response.status === 404) return { kind: "not_found" };
+    if (!response.ok) {
+      const text = await response.text();
+      return {
+        kind: "error",
+        message: `HTTP ${response.status}${text ? `: ${text.slice(0, 160)}` : ""}`,
+      };
+    }
+    const service = (await response.json()) as Service;
+    return { kind: "ok", service };
+  } catch (e) {
+    return {
+      kind: "error",
+      message: e instanceof Error ? e.message : "Network error",
+    };
+  }
+}
+
+export async function getServiceBySlug(moduleSlug: string, slug: string) {
+  const result = await fetchServiceDetail(moduleSlug, slug);
+  if (result.kind === "ok") return result.service;
+  return undefined;
 }
 
 export async function createService(input: ServiceInput) {
   const existing = await getAllServices();
-  const preview = normalizeInput(input, existing);
-  const matched = existing.find((item) => item.module === preview.module && item.slug === preview.slug);
+  const targetModule = slugify(input.module) || "general";
+  const targetTitle = input.title.trim();
+  const targetSlug = slugify(input.slug?.trim() || targetTitle);
+  const matched = existing.find((item) => item.module === targetModule && item.slug === targetSlug);
 
   if (matched) {
     return updateService(matched.id, input);
@@ -145,6 +223,88 @@ export async function seedServices(replace = false) {
   }
 }
 
+export async function clearAllServices() {
+  const response = await fetch(`${API_BASE_URL}/admin/clear-services`, { method: "POST" });
+  if (!response.ok) {
+    throw new Error(`Clear failed with status ${response.status}`);
+  }
+}
+
+/** Static menu when DB has no rows or API is unreachable — same URLs as seeded services. */
+export function buildNavMenuFromSeed(): NavMenuModule[] {
+  return menuSeed.map((moduleEntry) => {
+    const moduleSlug = slugify(moduleEntry.title);
+    return {
+      title: moduleEntry.title,
+      sections: moduleEntry.sections.map((section) => ({
+        title: section.title,
+        items: section.items.map((name) => ({
+          name,
+          href: `/services/${moduleSlug}/${slugify(name)}`,
+        })),
+      })),
+    };
+  });
+}
+
+function sectionKey(title?: string) {
+  return title ?? "__general__";
+}
+
+function orderItemsBySeed(seedNames: string[], items: NavMenuItem[]): NavMenuItem[] {
+  const byName = new Map(items.map((i) => [i.name, i]));
+  const ordered: NavMenuItem[] = [];
+  const seen = new Set<string>();
+  for (const name of seedNames) {
+    const hit = byName.get(name);
+    if (hit) {
+      ordered.push(hit);
+      seen.add(name);
+    }
+  }
+  for (const i of items) {
+    if (!seen.has(i.name)) ordered.push(i);
+  }
+  return ordered;
+}
+
+/** Match screenshot / menuSeed: module order, section order, item order within sections. */
+export function applyMenuSeedOrdering(menu: NavMenuModule[]): NavMenuModule[] {
+  const sortedModules = [...menu].sort((a, b) => {
+    const ia = menuSeed.findIndex((m) => m.title === a.title || slugify(m.title) === slugify(a.title));
+    const ib = menuSeed.findIndex((m) => m.title === b.title || slugify(m.title) === slugify(b.title));
+    const ra = ia === -1 ? 1000 : ia;
+    const rb = ib === -1 ? 1000 : ib;
+    return ra - rb || a.title.localeCompare(b.title);
+  });
+
+  return sortedModules.map((mod) => {
+    const seedMod = menuSeed.find((m) => m.title === mod.title || slugify(m.title) === slugify(mod.title));
+    if (!seedMod) return mod;
+
+    const dbBySection = new Map<string, NavMenuSection>();
+    for (const sec of mod.sections) {
+      dbBySection.set(sectionKey(sec.title), sec);
+    }
+
+    const outSections: NavMenuSection[] = [];
+    for (const seedSec of seedMod.sections) {
+      const key = sectionKey(seedSec.title);
+      const dbSec = dbBySection.get(key);
+      if (!dbSec) continue;
+      outSections.push({
+        ...dbSec,
+        items: orderItemsBySeed(seedSec.items, dbSec.items),
+      });
+      dbBySection.delete(key);
+    }
+    for (const [, sec] of dbBySection) {
+      outSections.push(sec);
+    }
+    return { ...mod, sections: outSections };
+  });
+}
+
 export function buildNavServicesMenu(services: Service[]): NavMenuModule[] {
   const moduleMap = new Map<string, { title: string; categories: Map<string, { name: string; href: string }[]> }>();
 
@@ -170,9 +330,16 @@ export function buildNavServicesMenu(services: Service[]): NavMenuModule[] {
     title: moduleEntry.title,
     sections: Array.from(moduleEntry.categories.entries()).map(([sectionTitle, items]) => ({
       title: sectionTitle === "General" ? undefined : sectionTitle,
-      items: [...items].sort((a, b) => a.name.localeCompare(b.name)),
+      items,
     })),
   }));
+}
+
+/** Prefer DB-backed links; fall back to seed menu so the header never goes empty. */
+export function buildEffectiveNavMenu(services: Service[]): NavMenuModule[] {
+  const fromDb = buildNavServicesMenu(services);
+  if (fromDb.length > 0) return applyMenuSeedOrdering(fromDb);
+  return applyMenuSeedOrdering(buildNavMenuFromSeed());
 }
 
 export function getModuleOptions(services: Service[]) {

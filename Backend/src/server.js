@@ -8,7 +8,9 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+// Base64 hero images in JSON exceed the default ~100kb body limit
+const jsonLimit = process.env.JSON_BODY_LIMIT || "50mb";
+app.use(express.json({ limit: jsonLimit }));
 const { Pool } = pg;
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -24,6 +26,12 @@ if (process.env.allow_origin) {
       origin: process.env.allow_origin,
     }),
   );
+}
+
+function apiLog(method, path, detail = "") {
+  const ts = new Date().toISOString();
+  const suffix = detail ? ` | ${detail}` : "";
+  console.log(`[api ${ts}] ${method} ${path}${suffix}`);
 }
 
 function slugify(text = "") {
@@ -98,6 +106,10 @@ function ensureUniqueSlug(services, moduleSlug, baseSlug, ignoreId) {
   return candidate;
 }
 
+const COMING_SOON_INTRO = "Coming soon.";
+const COMING_SOON_OVERVIEW =
+  "We're preparing detailed content for this service. Please check back shortly or contact us for assistance.";
+
 function normalizePayload(input, services, ignoreId) {
   const module = slugify(input.module) || "general";
   const title = (input.title || "").trim();
@@ -126,7 +138,8 @@ function normalizePayload(input, services, ignoreId) {
   };
 }
 
-function buildSeedRows() {
+/** One row per menu item: default "Coming soon" until Admin publishes real content. */
+function buildComingSoonPlaceholders() {
   const rows = [];
   for (const moduleEntry of menuSeed) {
     const module = slugify(moduleEntry.title);
@@ -134,6 +147,8 @@ function buildSeedRows() {
       const categoryLabel = section.title || "General";
       const category = slugify(categoryLabel) || "general";
       for (const itemTitle of section.items) {
+        const itemSlug = slugify(itemTitle);
+        const stableId = `${module}__${itemSlug}`;
         const row = normalizePayload(
           {
             title: itemTitle,
@@ -141,22 +156,61 @@ function buildSeedRows() {
             moduleTitle: moduleEntry.title,
             category,
             categoryLabel,
-            slug: slugify(itemTitle),
-            introduction: `Learn more about ${itemTitle} with Compliance Desk India.`,
-            overview: `This offering covers ${itemTitle.toLowerCase()} from start to finish with practical compliance support.`,
-            features: ["Dedicated point of contact", "Checklist-driven execution", "Transparent status updates"],
-            benefits: ["Lower compliance risk", "Faster turnaround time", "Better decision support"],
-            process: ["Step 1: Discovery", "Step 2: Execution", "Step 3: Closure"],
+            slug: itemSlug,
+            introduction: COMING_SOON_INTRO,
+            overview: COMING_SOON_OVERVIEW,
+            features: ["Coming soon"],
+            benefits: [],
+            process: [],
             heroBannerImage: "/images/hero-ca-3.svg",
             heroRightImage: "/images/hero-ca.svg",
           },
           rows,
+          stableId,
         );
         rows.push(row);
       }
     }
   }
   return rows;
+}
+
+/**
+ * If this route matches the static menu, return the same placeholder row used by bulk seed.
+ * Used so the first visit creates "Coming soon" without running /admin/seed-services first.
+ */
+function findComingSoonPlaceholderForRoute(moduleSlug, itemSlug) {
+  for (const moduleEntry of menuSeed) {
+    if (slugify(moduleEntry.title) !== moduleSlug) continue;
+    for (const section of moduleEntry.sections) {
+      const categoryLabel = section.title || "General";
+      const category = slugify(categoryLabel) || "general";
+      for (const itemTitle of section.items) {
+        if (slugify(itemTitle) !== itemSlug) continue;
+        const stableId = `${moduleSlug}__${itemSlug}`;
+        return normalizePayload(
+          {
+            title: itemTitle,
+            module: moduleSlug,
+            moduleTitle: moduleEntry.title,
+            category,
+            categoryLabel,
+            slug: itemSlug,
+            introduction: COMING_SOON_INTRO,
+            overview: COMING_SOON_OVERVIEW,
+            features: ["Coming soon"],
+            benefits: [],
+            process: [],
+            heroBannerImage: "/images/hero-ca-3.svg",
+            heroRightImage: "/images/hero-ca.svg",
+          },
+          [],
+          stableId,
+        );
+      }
+    }
+  }
+  return null;
 }
 
 async function upsertService(service) {
@@ -210,37 +264,119 @@ async function upsertService(service) {
   );
 }
 
+/** Only inserts if (module, slug) is new — does not overwrite pages already edited in Admin. */
+async function insertPlaceholderIfMissing(service) {
+  await pool.query(
+    `
+      INSERT INTO services (
+        id, module, module_title, category, category_label, slug, title,
+        introduction, overview, features, benefits, process,
+        cta_headline, cta_subtext, cta_button_label, hero_banner_image, hero_right_image
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+      ON CONFLICT (module, slug) DO NOTHING
+    `,
+    [
+      service.id,
+      service.module,
+      service.moduleTitle,
+      service.category,
+      service.categoryLabel,
+      service.slug,
+      service.title,
+      service.introduction,
+      service.overview,
+      service.features,
+      service.benefits,
+      service.process,
+      service.ctaHeadline,
+      service.ctaSubtext,
+      service.ctaButtonLabel,
+      service.heroBannerImage,
+      service.heroRightImage,
+    ],
+  );
+}
+
+app.post("/admin/clear-services", async (_req, res) => {
+  apiLog("POST", "/admin/clear-services", "truncate services table");
+  try {
+    await pool.query(`DELETE FROM services`);
+    apiLog("POST", "/admin/clear-services", "→ 200");
+    return res.json({ ok: true, message: "All services removed." });
+  } catch (err) {
+    console.error("[api] clear-services failed:", err);
+    return res.status(500).json({ message: "Failed to clear services" });
+  }
+});
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
 app.get("/services", async (_req, res) => {
-  const result = await pool.query(`SELECT * FROM services ORDER BY module_title ASC, title ASC`);
-  res.json(result.rows.map(rowToService));
+  apiLog("GET", "/services", "list all");
+  try {
+    const result = await pool.query(`SELECT * FROM services ORDER BY module_title ASC, title ASC`);
+    const rows = result.rows.map(rowToService);
+    apiLog("GET", "/services", `→ 200, ${rows.length} services`);
+    res.json(rows);
+  } catch (err) {
+    console.error("[api] GET /services failed:", err);
+    res.status(500).json({ message: "Failed to load services" });
+  }
 });
 
 app.get("/services/:module/:slug", async (req, res) => {
-  const result = await pool.query(`SELECT * FROM services WHERE module = $1 AND slug = $2 LIMIT 1`, [
-    req.params.module,
-    req.params.slug,
-  ]);
-  if (result.rows.length === 0) {
-    return res.status(404).json({ message: "Service not found" });
+  const { module, slug } = req.params;
+  apiLog("GET", `/services/:module/:slug`, `module=${module} slug=${slug}`);
+  try {
+    const result = await pool.query(`SELECT * FROM services WHERE module = $1 AND slug = $2 LIMIT 1`, [
+      module,
+      slug,
+    ]);
+    if (result.rows.length > 0) {
+      apiLog("GET", `/services/${module}/${slug}`, "→ 200 OK (existing row)");
+      return res.json(rowToService(result.rows[0]));
+    }
+
+    const placeholder = findComingSoonPlaceholderForRoute(module, slug);
+    if (!placeholder) {
+      apiLog("GET", `/services/${module}/${slug}`, "→ 404 unknown route (not in menu seed)");
+      return res.status(404).json({ message: "Service not found" });
+    }
+
+    await insertPlaceholderIfMissing(placeholder);
+    const afterInsert = await pool.query(`SELECT * FROM services WHERE module = $1 AND slug = $2 LIMIT 1`, [
+      module,
+      slug,
+    ]);
+    if (afterInsert.rows.length === 0) {
+      console.error(`[api] Lazy placeholder insert failed for ${module}/${slug}`);
+      return res.status(500).json({ message: "Failed to create placeholder" });
+    }
+    apiLog("GET", `/services/${module}/${slug}`, "→ 200 OK (lazy Coming soon placeholder)");
+    return res.json(rowToService(afterInsert.rows[0]));
+  } catch (err) {
+    console.error(`[api] GET /services/${module}/${slug} failed:`, err);
+    return res.status(500).json({ message: "Failed to load service" });
   }
-  return res.json(rowToService(result.rows[0]));
 });
 
 app.post("/services", async (req, res) => {
+  apiLog("POST", "/services", "create / upsert");
   const existingResult = await pool.query(`SELECT * FROM services`);
   const services = existingResult.rows.map(rowToService);
   const next = normalizePayload(req.body, services);
 
   await upsertService(next);
 
+  apiLog("POST", "/services", `→ 201 id=${next.id} ${next.module}/${next.slug}`);
   res.status(201).json(next);
 });
 
 app.put("/services/:id", async (req, res) => {
+  apiLog("PUT", `/services/${req.params.id}`, "update");
   const existingResult = await pool.query(`SELECT * FROM services`);
   const services = existingResult.rows.map(rowToService);
   const existing = services.find((s) => s.id === req.params.id);
@@ -292,24 +428,55 @@ app.put("/services/:id", async (req, res) => {
       next.heroRightImage,
     ],
   );
+  apiLog("PUT", `/services/${req.params.id}`, `→ 200 ${next.module}/${next.slug}`);
   return res.json(next);
 });
 
 app.delete("/services/:id", async (req, res) => {
+  apiLog("DELETE", `/services/${req.params.id}`);
   await pool.query(`DELETE FROM services WHERE id = $1`, [req.params.id]);
   return res.status(204).send();
 });
 
 app.post("/admin/seed-services", async (req, res) => {
   const replace = req.query.replace === "true";
-  if (replace) {
-    await pool.query(`DELETE FROM services`);
+  apiLog("POST", "/admin/seed-services", replace ? "replace=true (full reset)" : "fill-missing only");
+  try {
+    if (replace) {
+      await pool.query(`DELETE FROM services`);
+    }
+    const placeholderRows = buildComingSoonPlaceholders();
+    for (const row of placeholderRows) {
+      if (replace) {
+        await upsertService(row);
+      } else {
+        await insertPlaceholderIfMissing(row);
+      }
+    }
+    apiLog(
+      "POST",
+      "/admin/seed-services",
+      `→ ${replace ? "reset" : "fill-missing"} totalPlaceholders=${placeholderRows.length}`,
+    );
+    return res.json({
+      ok: true,
+      placeholders: placeholderRows.length,
+      replace,
+    });
+  } catch (err) {
+    console.error("[api] seed-services failed:", err);
+    return res.status(500).json({ message: "Seed failed" });
   }
-  const seedRows = buildSeedRows();
-  for (const row of seedRows) {
-    await upsertService(row);
+});
+
+// Friendly error response for oversized payloads (e.g. large base64 images)
+app.use((err, _req, res, next) => {
+  if (err?.type === "entity.too.large" || err?.status === 413) {
+    return res.status(413).json({
+      message: "Uploaded images are too large. Please use smaller/compressed images.",
+    });
   }
-  return res.json({ seeded: seedRows.length, replace });
+  return next(err);
 });
 
 const PORT = process.env.PORT || 4000;

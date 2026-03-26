@@ -9,7 +9,8 @@ type ServiceFormProps = {
   initial?: Service | null;
   moduleOptions: { value: string; label: string }[];
   onCancel?: () => void;
-  onSubmit: (input: ServiceInput) => void;
+  isSubmitting?: boolean;
+  onSubmit: (input: ServiceInput) => Promise<void> | void;
 };
 
 function parseModuleTitle(moduleSlug: string) {
@@ -67,7 +68,13 @@ async function readFileAsDataUrl(file: File) {
   });
 }
 
-export default function ServiceForm({ initial, moduleOptions, onCancel, onSubmit }: ServiceFormProps) {
+export default function ServiceForm({
+  initial,
+  moduleOptions,
+  onCancel,
+  isSubmitting = false,
+  onSubmit,
+}: ServiceFormProps) {
   const moduleSeedMap = useMemo(
     () =>
       new Map(
@@ -341,9 +348,20 @@ export default function ServiceForm({ initial, moduleOptions, onCancel, onSubmit
       {imageError && <p className="text-sm font-semibold text-destructive">{imageError}</p>}
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit">{initial ? "Save changes" : "Upload content"}</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {initial ? "Saving..." : "Uploading..."}
+            </span>
+          ) : initial ? (
+            "Save changes"
+          ) : (
+            "Upload content"
+          )}
+        </Button>
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </Button>
         )}
